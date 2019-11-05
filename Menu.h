@@ -2,7 +2,7 @@
 #define MENU_H
 
 #include <QMainWindow>
-//#include "gameview.h"
+#include "gameview.h"
 #include "client.h"
 
 namespace Ui {
@@ -21,7 +21,7 @@ private slots:
     void on_pushButton_join_clicked();
 
     void on_pushButton_exit_clicked();
-    void startGame(QVector <QString> map);
+    void startGame(idAndMap info);
 
 private:
     Ui::Menu *ui;

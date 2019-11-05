@@ -26,12 +26,14 @@ CONFIG += c++11
 
 SOURCES += \
         client.cpp \
+        gameview.cpp \
         main.cpp \
         Menu.cpp
 
 HEADERS += \
         Menu.h \
-        client.h
+        client.h \
+        gameview.h
 
 FORMS += \
         Menu.ui

@@ -17,12 +17,12 @@ public:
     void SendToServer (PlayerInfo player);
 
 public slots:
-    void SlotReadyRead ();
-    void slotError (QAbstractSocket::SocketError);
+    void SlotReadIdAndMap();
+    void SlotReadyRead();
+    void slotError(QAbstractSocket::SocketError);
     void slotConnected();
 signals:
-    void mapReceived(QVector <QString> map);
-    void idReceived(qint32 id);
+    void mapAndIdReceived(idAndMap info);
     void coordsReceived(QVector<PlayerInfo> players);
 };
 

@@ -21,6 +21,7 @@ private:
     QVector<PlayerInfo> players;
     Client* client;
     QList<Plane*> planes;
+    QTimer* animationTimer;
 
     void drawMap(QVector <QString>& map) const;
 
@@ -30,13 +31,15 @@ private:
     void noRotation();
     void fire();
 
+    void createNewPlayer(PlayerInfo& player);
+    void updatePlayerParams(PlayerInfo& player);
+
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void keyReleaseEvent(QKeyEvent *event);
 
 private slots:
     void updatePlayersCoords(QVector <PlayerInfo>& players);
-
-
+    void updatePlanePos(Plane* plane);
 };
 
 #endif // GAMEVIEW_H

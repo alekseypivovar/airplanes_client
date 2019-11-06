@@ -5,10 +5,18 @@ GameView::GameView(Client *client, idAndMap &info)
 {
     this->client = client;
     this->id     = info.id;
+    this->players = QVector<PlayerInfo>(32);
+    QGraphicsScene* scene = new QGraphicsScene();
+    this->setScene(scene);
 
     drawMap(info.map);
 
     connect(client, SIGNAL(coordsReceived(QVector<PlayerInfo>)), this, SLOT(updatePlayersCoords(QVector<PlayerInfo>)));
+
+    animationTimer = new QTimer;
+    animationTimer->start(1000 / FRAMES_PER_SEC);
+    if (scene != nullptr)
+        connect(animationTimer, SIGNAL(timeout()), this->scene(), SLOT(advance()));
 }
 
 void GameView::drawMap(QVector<QString>& map) const
@@ -58,6 +66,26 @@ void GameView::fire()
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }
 
+void GameView::createNewPlayer(PlayerInfo &player)
+{
+    players[player.getId()] = player;
+
+    Plane* plane = new Plane(id, player.getType(), player.getAngle(), player.getSpeed(), player.getAngleSpeed(), player.getHealth());
+    this->scene()->addItem(plane);
+    plane->setPos(player.getPos());
+
+    if (player.getId() == this-> id)
+        connect(plane, SIGNAL(planeMoved(Plane*)), this, SLOT(updatePlanePos(Plane*)));
+}
+
+void GameView::updatePlayerParams(PlayerInfo &player)
+{
+    qint32 number = player.getId();
+    players[number].setSpeed(player.getSpeed());
+    players[number].setAngleSpeed(player.getAngleSpeed());
+    // Проверка здоровья ++++++++++++++++++++++++++++++++++++++
+}
+
 void GameView::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key::Key_Left)
@@ -79,6 +107,21 @@ void GameView::keyReleaseEvent(QKeyEvent *event)
 
 void GameView::updatePlayersCoords(QVector<PlayerInfo>& players)
 {
+    for (PlayerInfo& playerInfo : players) {
+        if (playerInfo.getId() < this->players.size()) {
+            updatePlayerParams(playerInfo);
+        }
+        else {
+            createNewPlayer(playerInfo);
+        }
+
+    }
+
     this->players = players;
     // Добавить всякие проверки на мертвость и так далее
+}
+
+void GameView::updatePlanePos(Plane* plane)
+{
+    this->centerOn(plane->scenePos());
 }

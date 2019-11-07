@@ -38,9 +38,13 @@ void Client::SlotReadIdAndMap()
     idAndMap info;
     in >> info;
 
-    emit mapAndIdReceived(info);
+    if (!info.map.isEmpty()) {
+        disconnect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadIdAndMap()));
 
-    connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadyRead()));
+        emit mapAndIdReceived(info);
+
+        connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadyRead()));
+    }
 }
 
 void Client::SlotReadyRead()

@@ -4,10 +4,11 @@ Client::Client(const QString &strHost, int nPort, QObject *parent)
 {
     pTcpSpcket = new QTcpSocket(this);
     pTcpSpcket->connectToHost(strHost, quint16(nPort));
-
+    blockSize = 0;
     connect(pTcpSpcket, SIGNAL(connected()), this, SLOT(slotConnected()));
     connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadIdAndMap()));
     connect(pTcpSpcket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+
 }
 
 
@@ -15,9 +16,9 @@ void Client::SendToServer(PlayerInfo player)
 {
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
-    out << quint16(0) << player;
+    out << quint32(0) << player;
     out.device()->seek(0);
-    out << quint16(block.size() - sizeof (quint16));
+    out << quint32(block.size() - sizeof (quint32));
     pTcpSpcket->write(block);
 }
 
@@ -26,7 +27,7 @@ void Client::SlotReadIdAndMap()
     QDataStream in(pTcpSpcket);
 
     if (blockSize == 0){
-        if (pTcpSpcket->bytesAvailable() < sizeof (quint16))
+        if (pTcpSpcket->bytesAvailable() < int(sizeof (quint32)))
             return;
         in >> blockSize;
     }
@@ -52,7 +53,7 @@ void Client::SlotReadyRead()
     QDataStream in(pTcpSpcket);
 
     if (blockSize == 0){
-        if (pTcpSpcket->bytesAvailable() < sizeof (quint16))
+        if (pTcpSpcket->bytesAvailable() < int(sizeof (quint16)))
             return;
         in >> blockSize;
     }

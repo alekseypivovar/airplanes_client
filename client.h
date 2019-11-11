@@ -9,7 +9,7 @@ class Client : public QObject
     Q_OBJECT
 private:
     QTcpSocket* pTcpSpcket;
-    quint16 blockSize;
+    quint32 blockSize;
 
 
 public:

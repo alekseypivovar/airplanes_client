@@ -5,9 +5,10 @@ GameView::GameView(Client *client, idAndMap &info)
 {
     this->client = client;
     this->id     = info.id;
-    this->players = QVector<PlayerInfo>(32);
+    /*this->players = QVector<PlayerInfo>(32)*/;
     QGraphicsScene* scene = new QGraphicsScene();
     this->setScene(scene);
+    rotationKeyPressed = false;
 
     drawMap(info.map);
 
@@ -17,6 +18,8 @@ GameView::GameView(Client *client, idAndMap &info)
     animationTimer->start(1000 / FRAMES_PER_SEC);
     if (scene != nullptr)
         connect(animationTimer, SIGNAL(timeout()), this->scene(), SLOT(advance()));
+
+    this->setRenderHint(QPainter::Antialiasing, true);
 }
 
 void GameView::drawMap(QVector<QString>& map) const
@@ -49,31 +52,39 @@ void GameView::exitProgramm()
 void GameView::rotateLeft()
 {
     players[id].setAngleSpeed(ANGLE_SPEED);
+    client->SendToServer(players.at(id));
 }
 
 void GameView::rotateRight()
 {
     players[id].setAngleSpeed(-ANGLE_SPEED);
+    client->SendToServer(players.at(id));
 }
 
 void GameView::noRotation()
 {
     players[id].setAngleSpeed(0);
+    client->SendToServer(players.at(id));
 }
 
 void GameView::fire()
 {
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//     client->SendToServer(players.at(id));
 }
 
 void GameView::createNewPlayer(PlayerInfo &player)
 {
-    players[player.getId()] = player;
+//    if (players.size() < player.getId())
+//        players.resize(player.getId());
+
+    //players[player.getId()] = player;
+    players << player;
 
     Plane* plane = new Plane(id, player.getType(), player.getAngle(), player.getSpeed(), player.getAngleSpeed(), player.getHealth());
     this->scene()->addItem(plane);
     plane->setPos(player.getPos());
-
+    planes << plane;
     if (player.getId() == this-> id)
         connect(plane, SIGNAL(planeMoved(Plane*)), this, SLOT(updatePlanePos(Plane*)));
 }
@@ -81,17 +92,26 @@ void GameView::createNewPlayer(PlayerInfo &player)
 void GameView::updatePlayerParams(PlayerInfo &player)
 {
     qint32 number = player.getId();
-    players[number].setSpeed(player.getSpeed());
-    players[number].setAngleSpeed(player.getAngleSpeed());
+    players[number]. setSpeed(player.getSpeed());
+    players[number]. setAngleSpeed(player.getAngleSpeed());
+    //players[number]. setPos(player.getPos());
+    planes [number]->setSpeed(player.getSpeed());
+    planes [number]->setAngleSpeed(player.getAngleSpeed());
+    //planes [number]->setPos(player.getPos());
     // Проверка здоровья ++++++++++++++++++++++++++++++++++++++
 }
 
 void GameView::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key::Key_Left)
+    if (!rotationKeyPressed && event->key() == Qt::Key::Key_Left) {
+        rotationKeyPressed = true;
         rotateLeft();
-    else if (event->key() == Qt::Key::Key_Right)
+    }
+    else if (!rotationKeyPressed && event->key() == Qt::Key::Key_Right)
+    {
+        rotationKeyPressed = true;
         rotateRight();
+    }
     else if (event->key() == Qt::Key::Key_Space)
         fire();
     else if (event->key() == Qt::Key::Key_Escape)
@@ -100,12 +120,14 @@ void GameView::keyPressEvent(QKeyEvent *event)
 
 void GameView::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key::Key_Left || event->key() == Qt::Key::Key_Right)
+    if (event->key() == Qt::Key::Key_Left || event->key() == Qt::Key::Key_Right){
+        rotationKeyPressed = false;
         noRotation();
+    }
 }
 
 
-void GameView::updatePlayersCoords(QVector<PlayerInfo>& players)
+void GameView::updatePlayersCoords(QVector<PlayerInfo> players)
 {
     for (PlayerInfo& playerInfo : players) {
         if (playerInfo.getId() < this->players.size()) {

@@ -20,8 +20,9 @@ private:
     qint32 id;
     QVector<PlayerInfo> players;
     Client* client;
-    QList<Plane*> planes;
+    QVector<Plane*> planes;
     QTimer* animationTimer;
+    bool rotationKeyPressed;
 
     void drawMap(QVector <QString>& map) const;
 
@@ -38,7 +39,7 @@ private:
     virtual void keyReleaseEvent(QKeyEvent *event);
 
 private slots:
-    void updatePlayersCoords(QVector <PlayerInfo>& players);
+    void updatePlayersCoords(QVector <PlayerInfo> players);
     void updatePlanePos(Plane* plane);
 };
 

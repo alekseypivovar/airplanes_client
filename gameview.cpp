@@ -5,10 +5,9 @@ GameView::GameView(Client *client, idAndMap &info)
 {
     this->client = client;
     this->id     = info.id;
-    /*this->players = QVector<PlayerInfo>(32)*/;
+    /*this->players = QVector<PlayerInfo>(32)*/
     QGraphicsScene* scene = new QGraphicsScene();
     this->setScene(scene);
-    rotationKeyPressed = false;
 
     drawMap(info.map);
 
@@ -25,7 +24,7 @@ GameView::GameView(Client *client, idAndMap &info)
 void GameView::drawMap(QVector<QString>& map) const
 {
     // Устанавливаем размер сцены на весь мир
-    this->scene()->setSceneRect(0,0, map.at(0).length() * TILE_SIZE, map.length() * TILE_SIZE);
+    this->scene()->setSceneRect(0,0, (map.at(0).length() - 1) * TILE_SIZE, map.length() * TILE_SIZE);
 
     // Перебор и расстановка тайлов. j - номер тайла по оси Х, i - номер по оси Y
     for (int i = 0; i < map.length(); i++) {
@@ -94,35 +93,46 @@ void GameView::updatePlayerParams(PlayerInfo &player)
     qint32 number = player.getId();
     players[number]. setSpeed(player.getSpeed());
     players[number]. setAngleSpeed(player.getAngleSpeed());
-    //players[number]. setPos(player.getPos());
+    players[number]. setPos(player.getPos());
     planes [number]->setSpeed(player.getSpeed());
     planes [number]->setAngleSpeed(player.getAngleSpeed());
-    //planes [number]->setPos(player.getPos());
+//    planes [number]->setPos(player.getPos());
     // Проверка здоровья ++++++++++++++++++++++++++++++++++++++
 }
 
 void GameView::keyPressEvent(QKeyEvent *event)
 {
-    if (!rotationKeyPressed && event->key() == Qt::Key::Key_Left) {
-        rotationKeyPressed = true;
-        rotateLeft();
+    if (event->isAutoRepeat()) {
+        event->ignore();
     }
-    else if (!rotationKeyPressed && event->key() == Qt::Key::Key_Right)
-    {
-        rotationKeyPressed = true;
-        rotateRight();
+    else {
+        if (event->key() == Qt::Key::Key_Left) {
+            rotateLeft();
+        }
+        else if (event->key() == Qt::Key::Key_Right)
+        {
+            rotateRight();
+        }
+        else if (event->key() == Qt::Key::Key_Space)
+            fire();
+        else if (event->key() == Qt::Key::Key_Escape)
+            exitProgramm();
+
+        event->accept();
     }
-    else if (event->key() == Qt::Key::Key_Space)
-        fire();
-    else if (event->key() == Qt::Key::Key_Escape)
-        exitProgramm();
+
 }
+
 
 void GameView::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key::Key_Left || event->key() == Qt::Key::Key_Right){
-        rotationKeyPressed = false;
-        noRotation();
+    if(event->isAutoRepeat() ) {
+        event->ignore();
+    } else {
+        if (event->key() == Qt::Key::Key_Left || event->key() == Qt::Key::Key_Right){
+            noRotation();
+        }
+        event->accept();
     }
 }
 

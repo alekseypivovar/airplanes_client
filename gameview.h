@@ -17,12 +17,11 @@ public:
     GameView(Client* client, idAndMap& info);
 
 private:
-    qint32 id;
+    qint16 id;
     QVector<PlayerInfo> players;
     Client* client;
     QVector<Plane*> planes;
     QTimer* animationTimer;
-    bool rotationKeyPressed;
 
     void drawMap(QVector <QString>& map) const;
 

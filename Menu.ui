@@ -25,7 +25,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_ip"/>
+       <widget class="QLineEdit" name="lineEdit_ip">
+        <property name="text">
+         <string>localhost</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -35,6 +39,9 @@
        <widget class="QPushButton" name="pushButton_join">
         <property name="text">
          <string>JOIN GAME</string>
+        </property>
+        <property name="default">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

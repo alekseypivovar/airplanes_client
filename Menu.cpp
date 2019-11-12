@@ -6,6 +6,7 @@ Menu::Menu(QWidget *parent) :
     ui(new Ui::Menu)
 {
     ui->setupUi(this);
+    ui->pushButton_join->setFocus();
 }
 
 Menu::~Menu()

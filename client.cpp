@@ -15,7 +15,7 @@ Client::Client(const QString &strHost, int nPort, QObject *parent)
 }
 
 
-void Client::SendToServer(const PlayerInfo& player)
+void Client::SendToServer(const PlayerInfo player)
 {
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);

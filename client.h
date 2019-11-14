@@ -15,7 +15,8 @@ private:
 
 public:
     explicit Client(const QString &strHost, int nPort, QObject *parent = nullptr);
-    void SendToServer (const PlayerInfo& player);
+public slots:
+    void SendToServer (const PlayerInfo player);
 
 public slots:
     void SlotReadIdAndMap();
@@ -23,8 +24,8 @@ public slots:
     void slotError(QAbstractSocket::SocketError);
     void slotConnected();
 signals:
-    void mapAndIdReceived(idAndMap& info);
-    void coordsReceived(QVector<PlayerInfo>& players);
+    void mapAndIdReceived(idAndMap info);
+    void coordsReceived(QVector<PlayerInfo> players);
 };
 
 #endif // CLIENT_H

@@ -22,7 +22,7 @@ private slots:
     void on_pushButton_join_clicked();
 
     void on_pushButton_exit_clicked();
-    void startGame(idAndMap& info);
+    void startGame(idAndMap info);
 
 private:
     Ui::Menu *ui;

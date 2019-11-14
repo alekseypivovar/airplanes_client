@@ -11,7 +11,8 @@ GameView::GameView(Client *client, idAndMap &info)
 
     drawMap(info.map);
 
-    connect(client, SIGNAL(coordsReceived(QVector<PlayerInfo>&)), this, SLOT(updatePlayersCoords(QVector<PlayerInfo>&)));
+    connect(client, SIGNAL(coordsReceived(QVector<PlayerInfo>)), this, SLOT(updatePlayersCoords(QVector<PlayerInfo>)));
+    connect(this, SIGNAL(SendToServer(PlayerInfo)), client, SLOT(SendToServer(PlayerInfo)));
 
     animationTimer = new QTimer;
     animationTimer->start(1000 / FRAMES_PER_SEC);
@@ -52,35 +53,31 @@ void GameView::rotateLeft()
 {
     qDebug() << "Rotate LEFT!";
     players[id].setAngleSpeed(ANGLE_SPEED);
-    client->SendToServer(players.at(id));    
+    emit SendToServer(players.at(id));
 }
 
 void GameView::rotateRight()
 {
     qDebug() << "Rotate RIGHT!";
     players[id].setAngleSpeed(-ANGLE_SPEED);
-    client->SendToServer(players.at(id));
+    emit SendToServer(players.at(id));
 }
 
 void GameView::noRotation()
 {
     qDebug() << "Rotation STOP!";
     players[id].setAngleSpeed(0);
-    client->SendToServer(players.at(id));
+    emit SendToServer(players.at(id));
 }
 
 void GameView::fire()
 {
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//     client->SendToServer(players.at(id));
+//     emit SendToServer(players.at(id));
 }
 
 void GameView::createNewPlayer(PlayerInfo &player)
 {
-//    if (players.size() < player.getId())
-//        players.resize(player.getId());
-
-    //players[player.getId()] = player;
     players << player;
 
     Plane* plane = new Plane(id, player.getType(), player.getAngle(), player.getSpeed(), player.getAngleSpeed(), player.getHealth());
@@ -95,13 +92,16 @@ void GameView::updatePlayerParams(PlayerInfo &player)
 {
     qint32 number = player.getId();
     players[number]. setSpeed(player.getSpeed());
+    players[number]. setAngle(player.getAngle());
     players[number]. setAngleSpeed(player.getAngleSpeed());
     planes [number]->setSpeed(player.getSpeed());
     planes [number]->setAngleSpeed(player.getAngleSpeed());
-    if (QLineF(planes [number]->scenePos(), player.getPos()).length() > 100) {
-        players[number]. setPos(player.getPos());
+    planes [number]->setAngle(player.getAngle());
+//    if (QLineF(planes [number]->scenePos(), player.getPos()).length() > 10) {
+ //       players[number]. setPos(player.getPos());
         planes [number]->setPos(player.getPos());
-    }
+
+//    }
     // Проверка здоровья ++++++++++++++++++++++++++++++++++++++
 }
 
@@ -142,7 +142,7 @@ void GameView::keyReleaseEvent(QKeyEvent *event)
 }
 
 
-void GameView::updatePlayersCoords(QVector<PlayerInfo>& players)
+void GameView::updatePlayersCoords(QVector<PlayerInfo> players)
 {
     for (PlayerInfo& playerInfo : players) {
         if (playerInfo.getId() < this->players.size()) {
@@ -160,5 +160,7 @@ void GameView::updatePlayersCoords(QVector<PlayerInfo>& players)
 
 void GameView::updatePlanePos(Plane* plane)
 {
+    players[plane->getId()].setAngle(plane->getAngle());
+    players[plane->getId()].setPos  (plane->scenePos());
     this->centerOn(plane->scenePos());
 }

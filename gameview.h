@@ -38,8 +38,11 @@ private:
     virtual void keyReleaseEvent(QKeyEvent *event);
 
 private slots:
-    void updatePlayersCoords(QVector <PlayerInfo>& players);
+    void updatePlayersCoords(QVector <PlayerInfo> players);
     void updatePlanePos(Plane* plane);
+
+signals:
+    void SendToServer(PlayerInfo player);
 };
 
 #endif // GAMEVIEW_H

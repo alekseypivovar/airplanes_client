@@ -2,46 +2,53 @@
 
 Client::Client(const QString &strHost, int nPort, QObject *parent)
 {
+    mapReceived = false;
     pTcpSpcket = new QTcpSocket(this);
     pTcpSpcket->connectToHost(strHost, quint16(nPort));
     blockSize = 0;
+    blockSize_map = 0;
     connect(pTcpSpcket, SIGNAL(connected()), this, SLOT(slotConnected()));
     connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadIdAndMap()));
+    //connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadyRead()));
     connect(pTcpSpcket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
 
 }
 
 
-void Client::SendToServer(PlayerInfo player)
+void Client::SendToServer(const PlayerInfo& player)
 {
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
-    out << quint32(0) << player;
+    out << quint16(0) << player;
     out.device()->seek(0);
-    out << quint32(block.size() - sizeof (quint32));
+    out << quint16(block.size() - sizeof (quint16));
     pTcpSpcket->write(block);
+    qDebug() << "Data SEND!";
 }
 
 void Client::SlotReadIdAndMap()
 {
+    qDebug() << "Read map!";
     QDataStream in(pTcpSpcket);
 
-    if (blockSize == 0){
+    if (blockSize_map == 0){
         if (pTcpSpcket->bytesAvailable() < int(sizeof (quint32)))
             return;
-        in >> blockSize;
+        in >> blockSize_map;
     }
 
-    if (pTcpSpcket->bytesAvailable() < blockSize)
+    if (pTcpSpcket->bytesAvailable() < blockSize_map)
         return;
 
-    blockSize = 0;
+    blockSize_map = 0;
     idAndMap info;
     in >> info;
 
     if (!info.map.isEmpty()) {
+        qDebug() << "Map RECEIVED";
         disconnect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadIdAndMap()));
-
+        mapReceived = true;
+        pTcpSpcket->readAll();
         emit mapAndIdReceived(info);
 
         connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadyRead()));
@@ -50,6 +57,7 @@ void Client::SlotReadIdAndMap()
 
 void Client::SlotReadyRead()
 {
+    //qDebug() << "Read data...";
     QDataStream in(pTcpSpcket);
 
     if (blockSize == 0){
@@ -65,7 +73,9 @@ void Client::SlotReadyRead()
     QVector<PlayerInfo> players;
     in >> players;
 
-    emit coordsReceived(players);
+    if (mapReceived)
+        emit coordsReceived(players);
+    qDebug() << "Data RECEIVED!";
 }
 
 

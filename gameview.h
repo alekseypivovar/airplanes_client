@@ -38,7 +38,7 @@ private:
     virtual void keyReleaseEvent(QKeyEvent *event);
 
 private slots:
-    void updatePlayersCoords(QVector <PlayerInfo> players);
+    void updatePlayersCoords(QVector <PlayerInfo>& players);
     void updatePlanePos(Plane* plane);
 };
 

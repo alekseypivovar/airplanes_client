@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QTcpSocket>
 #include "playerinfo.h"
+#include "bullet.h"
 
 class Client : public QObject
 {
@@ -16,7 +17,7 @@ private:
 public:
     explicit Client(const QString &strHost, int nPort, QObject *parent = nullptr);
 public slots:
-    void SendToServer (const PlayerInfo player);
+    void SendToServer (const PlayerInfo player, SendInfoType type);
 
 public slots:
     void SlotReadIdAndMap();
@@ -26,6 +27,7 @@ public slots:
 signals:
     void mapAndIdReceived(idAndMap info);
     void coordsReceived(QVector<PlayerInfo> players);
+    void bulletReceived(BulletInfo bullet);
 };
 
 #endif // CLIENT_H

@@ -12,7 +12,8 @@ GameView::GameView(Client *client, idAndMap &info)
     drawMap(info.map);
 
     connect(client, SIGNAL(coordsReceived(QVector<PlayerInfo>)), this, SLOT(updatePlayersCoords(QVector<PlayerInfo>)));
-    connect(this, SIGNAL(SendToServer(PlayerInfo)), client, SLOT(SendToServer(PlayerInfo)));
+    connect(this, SIGNAL(SendToServer(PlayerInfo, SendInfoType)), client, SLOT(SendToServer(PlayerInfo, SendInfoType)));
+    connect(client, SIGNAL(bulletReceived(BulletInfo)), this, SLOT(createBullet(BulletInfo)));
 
     animationTimer = new QTimer;
     animationTimer->start(1000 / FRAMES_PER_SEC);
@@ -53,27 +54,26 @@ void GameView::rotateLeft()
 {
     qDebug() << "Rotate LEFT!";
     players[id].setAngleSpeed(ANGLE_SPEED);
-    emit SendToServer(players.at(id));
+    emit SendToServer(players.at(id), COORDS);
 }
 
 void GameView::rotateRight()
 {
     qDebug() << "Rotate RIGHT!";
     players[id].setAngleSpeed(-ANGLE_SPEED);
-    emit SendToServer(players.at(id));
+    emit SendToServer(players.at(id), COORDS);
 }
 
 void GameView::noRotation()
 {
     qDebug() << "Rotation STOP!";
     players[id].setAngleSpeed(0);
-    emit SendToServer(players.at(id));
+    emit SendToServer(players.at(id), COORDS);
 }
 
 void GameView::fire()
 {
-    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//     emit SendToServer(players.at(id));
+     emit SendToServer(players.at(id), BULLET);
 }
 
 void GameView::createNewPlayer(PlayerInfo &player)
@@ -163,4 +163,11 @@ void GameView::updatePlanePos(Plane* plane)
     players[plane->getId()].setAngle(plane->getAngle());
     players[plane->getId()].setPos  (plane->scenePos());
     this->centerOn(plane->scenePos());
+}
+
+void GameView::createBullet(BulletInfo bullet)
+{
+    Bullet* sceneBullet = new Bullet(bullet.startPos, bullet.angle);
+    this->scene()->addItem(sceneBullet);
+    sceneBullet->setPos(bullet.startPos);
 }

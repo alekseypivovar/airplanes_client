@@ -55,3 +55,6 @@ else:unix: LIBS += -L$$PWD/../build-Warships_airplanes_DLL-Desktop_Qt_5_12_5_Min
 
 INCLUDEPATH += $$PWD/../airplanes_lib-master
 DEPENDPATH += $$PWD/../airplanes_lib-master
+
+DISTFILES += \
+    images/plane.png

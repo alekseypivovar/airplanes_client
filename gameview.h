@@ -40,9 +40,10 @@ private:
 private slots:
     void updatePlayersCoords(QVector <PlayerInfo> players);
     void updatePlanePos(Plane* plane);
+    void createBullet(BulletInfo bullet);
 
 signals:
-    void SendToServer(PlayerInfo player);
+    void SendToServer(PlayerInfo player, SendInfoType type);
 };
 
 #endif // GAMEVIEW_H

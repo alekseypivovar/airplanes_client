@@ -15,11 +15,11 @@ Client::Client(const QString &strHost, int nPort, QObject *parent)
 }
 
 
-void Client::SendToServer(const PlayerInfo player)
+void Client::SendToServer(const PlayerInfo player, SendInfoType type)
 {
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
-    out << quint16(0) << player;
+    out << quint16(0) << type << player;
     out.device()->seek(0);
     out << quint16(block.size() - sizeof (quint16));
     pTcpSpcket->write(block);
@@ -41,6 +41,7 @@ void Client::SlotReadIdAndMap()
         return;
 
     blockSize_map = 0;
+
     idAndMap info;
     in >> info;
 
@@ -70,12 +71,28 @@ void Client::SlotReadyRead()
         return;
 
     blockSize = 0;
-    QVector<PlayerInfo> players;
-    in >> players;
 
-    if (mapReceived)
-        emit coordsReceived(players);
-    qDebug() << "Data RECEIVED!";
+    SendInfoType type;
+    int buffer;
+    in >> buffer;
+    type = SendInfoType(buffer);
+
+    if (type == COORDS) {
+
+        QVector<PlayerInfo> players;
+        in >> players;
+
+        if (mapReceived)
+            emit coordsReceived(players);
+        qDebug() << "Data RECEIVED!";
+    }
+    else if (type == BULLET) {
+        BulletInfo bullet;
+        in >> bullet;
+
+        emit bulletReceived(bullet);
+        qDebug() << "BULLET RECEIVED!";
+    }
 }
 
 

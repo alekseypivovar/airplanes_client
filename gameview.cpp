@@ -21,6 +21,8 @@ GameView::GameView(Client *client, idAndMap &info)
         connect(animationTimer, SIGNAL(timeout()), this->scene(), SLOT(advance()));
 
     this->setRenderHint(QPainter::Antialiasing, true);
+
+    controlsBlocked = false;
 }
 
 void GameView::drawMap(QVector<QString>& map) const
@@ -33,9 +35,46 @@ void GameView::drawMap(QVector<QString>& map) const
         for (int j = 0; j < map.at(0).length(); j++) {
             QPixmap tile;
             if (map.at(i).at(j) == "0"){
-                tile = QPixmap(":/images/0.png");
+                tile = QPixmap(":/images/0.bmp");
             }
-            // else if остальные тайлы ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            else if (map.at(i).at(j) == "1"){
+                tile = QPixmap(":/images/1.bmp");
+            }
+            else if (map.at(i).at(j) == "2"){
+                tile = QPixmap(":/images/2.bmp");
+            }
+            else if (map.at(i).at(j) == "3"){
+                tile = QPixmap(":/images/3.bmp");
+            }
+            else if (map.at(i).at(j) == "4"){
+                tile = QPixmap(":/images/4.bmp");
+            }
+            else if (map.at(i).at(j) == "5"){
+                tile = QPixmap(":/images/5.bmp");
+            }
+            else if (map.at(i).at(j) == "6"){
+                tile = QPixmap(":/images/6.bmp");
+            }
+            else if (map.at(i).at(j) == "7"){
+                tile = QPixmap(":/images/7.bmp");
+            }
+            else if (map.at(i).at(j) == "8"){
+                tile = QPixmap(":/images/8.bmp");
+            }else if (map.at(i).at(j) == "A"){
+                tile = QPixmap(":/images/A.bmp");
+            }
+            else if (map.at(i).at(j) == "B"){
+                tile = QPixmap(":/images/B.bmp");
+            }
+            else if (map.at(i).at(j) == "C"){
+                tile = QPixmap(":/images/C.bmp");
+            }
+            else if (map.at(i).at(j) == "D"){
+                tile = QPixmap(":/images/D.bmp");
+            }
+            else {
+                tile = QPixmap(":/images/E.bmp");
+            }
 
 
             //           tile = tile.scaled(TILE_SIZE, TILE_SIZE);
@@ -86,23 +125,32 @@ void GameView::createNewPlayer(PlayerInfo &player)
     planes << plane;
     if (player.getId() == this-> id)
         connect(plane, SIGNAL(planeMoved(Plane*)), this, SLOT(updatePlanePos(Plane*)));
+    connect(plane, SIGNAL(planeAndBulletCollided(Plane*, Bullet*)),
+            this, SLOT(planeAndBulletCollided(Plane*, Bullet*)));
 }
 
 void GameView::updatePlayerParams(PlayerInfo &player)
 {
     qint32 number = player.getId();
+
+    if (players.at(number).getSpeed() == 0 && player.getSpeed() > 0) {
+        planes [number]->show();
+        controlsBlocked = false;
+    }
+
     players[number]. setSpeed(player.getSpeed());
     players[number]. setAngle(player.getAngle());
     players[number]. setAngleSpeed(player.getAngleSpeed());
     planes [number]->setSpeed(player.getSpeed());
     planes [number]->setAngleSpeed(player.getAngleSpeed());
     planes [number]->setAngle(player.getAngle());
-//    if (QLineF(planes [number]->scenePos(), player.getPos()).length() > 10) {
- //       players[number]. setPos(player.getPos());
-        planes [number]->setPos(player.getPos());
+    planes [number]->setPos(player.getPos());
 
-//    }
-    // Проверка здоровья ++++++++++++++++++++++++++++++++++++++
+    players[number]. setHealth(player.getHealth());
+    if (players[number].getHealth() <= 0) {
+        planes [number]->hide();
+        controlsBlocked = true;
+    }
 }
 
 void GameView::keyPressEvent(QKeyEvent *event)
@@ -111,14 +159,14 @@ void GameView::keyPressEvent(QKeyEvent *event)
         event->ignore();
     }
     else {
-        if (event->key() == Qt::Key::Key_Left) {
+        if (!controlsBlocked && event->key() == Qt::Key::Key_Left) {
             rotateLeft();
         }
-        else if (event->key() == Qt::Key::Key_Right)
+        else if (!controlsBlocked && event->key() == Qt::Key::Key_Right)
         {
             rotateRight();
         }
-        else if (event->key() == Qt::Key::Key_Space)
+        else if (!controlsBlocked && event->key() == Qt::Key::Key_Space)
             fire();
         else if (event->key() == Qt::Key::Key_Escape)
             exitProgramm();
@@ -155,7 +203,7 @@ void GameView::updatePlayersCoords(QVector<PlayerInfo> players)
     }
 
     this->players = players;
-    // Добавить всякие проверки на мертвость и так далее
+
 }
 
 void GameView::updatePlanePos(Plane* plane)
@@ -163,11 +211,37 @@ void GameView::updatePlanePos(Plane* plane)
     players[plane->getId()].setAngle(plane->getAngle());
     players[plane->getId()].setPos  (plane->scenePos());
     this->centerOn(plane->scenePos());
+
+//    checkCollisions(plane);
 }
+
+void GameView::checkCollisions(Plane *plane)
+{
+    QList<QGraphicsItem *> items = scene()->collidingItems(plane);
+    if (items.isEmpty()) {
+        return;
+    }
+
+    for (int i = 0; i < items.length(); i++) {
+        Bullet* bullet = qgraphicsitem_cast<Bullet*>(items.at(i));
+        if (bullet) {
+            scene()->removeItem(bullet);
+            delete bullet;
+        }
+    }
+}
+
 
 void GameView::createBullet(BulletInfo bullet)
 {
     Bullet* sceneBullet = new Bullet(bullet.startPos, bullet.angle);
     this->scene()->addItem(sceneBullet);
     sceneBullet->setPos(bullet.startPos);
+}
+
+void GameView::planeAndBulletCollided(Plane *plane, Bullet *bullet)
+{
+    Q_UNUSED(plane)
+    this->scene()->removeItem(bullet);
+    delete bullet;
 }

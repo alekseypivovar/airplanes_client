@@ -22,6 +22,7 @@ private:
     Client* client;
     QVector<Plane*> planes;
     QTimer* animationTimer;
+    bool controlsBlocked;
 
     void drawMap(QVector <QString>& map) const;
 
@@ -34,6 +35,9 @@ private:
     void createNewPlayer(PlayerInfo& player);
     void updatePlayerParams(PlayerInfo& player);
 
+    void checkCollisions(Plane *plane);
+
+
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void keyReleaseEvent(QKeyEvent *event);
 
@@ -41,6 +45,7 @@ private slots:
     void updatePlayersCoords(QVector <PlayerInfo> players);
     void updatePlanePos(Plane* plane);
     void createBullet(BulletInfo bullet);
+    void planeAndBulletCollided(Plane* plane, Bullet* bullet);
 
 signals:
     void SendToServer(PlayerInfo player, SendInfoType type);

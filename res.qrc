@@ -16,5 +16,8 @@
         <file>images/D.bmp</file>
         <file>images/E.bmp</file>
         <file>images/0.bmp</file>
+        <file>images/boom.gif</file>
+        <file>sounds/airplane.wav</file>
+        <file>sounds/machinegun.wav</file>
     </qresource>
 </RCC>

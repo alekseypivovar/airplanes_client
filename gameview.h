@@ -5,6 +5,10 @@
 #include <QTimer>
 #include <QGraphicsPixmapItem>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QMovie>
+#include <QGraphicsProxyWidget>
+#include <QSound>
 #include "playerinfo.h"
 #include "client.h"
 #include "plane.h"
@@ -23,6 +27,8 @@ private:
     QVector<Plane*> planes;
     QTimer* animationTimer;
     bool controlsBlocked;
+    QSound machinegunSound;
+    QSound planeSound;
 
     void drawMap(QVector <QString>& map) const;
 
@@ -42,10 +48,12 @@ private:
     virtual void keyReleaseEvent(QKeyEvent *event);
 
 private slots:
-    void updatePlayersCoords(QVector <PlayerInfo> players);
+    void updatePlayersCoords(QVector <PlayerInfo> players_in);
     void updatePlanePos(Plane* plane);
     void createBullet(BulletInfo bullet);
     void planeAndBulletCollided(Plane* plane, Bullet* bullet);
+    void showExplosion(QPointF pos);
+//    void planeAndPlaneCollided(Plane* plane1, Plane* plane2);
 
 signals:
     void SendToServer(PlayerInfo player, SendInfoType type);

@@ -1,7 +1,8 @@
 #include "gameview.h"
 
 
-GameView::GameView(Client *client, idAndMap &info)
+GameView::GameView(Client *client, idAndMap &info) :
+    machinegunSound(":/sounds/machinegun.wav"), planeSound(":/sounds/airplane.wav")
 {
     this->client = client;
     this->id     = info.id;
@@ -123,10 +124,15 @@ void GameView::createNewPlayer(PlayerInfo &player)
     this->scene()->addItem(plane);
     plane->setPos(player.getPos());
     planes << plane;
-    if (player.getId() == this-> id)
+    if (player.getId() == this-> id) {
         connect(plane, SIGNAL(planeMoved(Plane*)), this, SLOT(updatePlanePos(Plane*)));
+        planeSound.setLoops(QSound::Infinite);
+        planeSound.play();
+    }
     connect(plane, SIGNAL(planeAndBulletCollided(Plane*, Bullet*)),
             this, SLOT(planeAndBulletCollided(Plane*, Bullet*)));
+//    connect(plane, SIGNAL(planeAndPlaneCollided(Plane*, Plane*)),
+//            this, SLOT(planeAndPlaneCollided(Plane*, Plane*)));
 }
 
 void GameView::updatePlayerParams(PlayerInfo &player)
@@ -146,10 +152,13 @@ void GameView::updatePlayerParams(PlayerInfo &player)
     planes [number]->setAngle(player.getAngle());
     planes [number]->setPos(player.getPos());
 
+    quint8 previousHealth = players[number].getHealth();
     players[number]. setHealth(player.getHealth());
-    if (players[number].getHealth() <= 0) {
+    if (previousHealth > 0 && players[number].getHealth() <= 0) {
         planes [number]->hide();
-        controlsBlocked = true;
+        showExplosion(players[number].getPos());
+        if (number == id)
+            controlsBlocked = true;
     }
 }
 
@@ -190,9 +199,9 @@ void GameView::keyReleaseEvent(QKeyEvent *event)
 }
 
 
-void GameView::updatePlayersCoords(QVector<PlayerInfo> players)
+void GameView::updatePlayersCoords(QVector<PlayerInfo> players_in)
 {
-    for (PlayerInfo& playerInfo : players) {
+    for (PlayerInfo& playerInfo : players_in) {
         if (playerInfo.getId() < this->players.size()) {
             updatePlayerParams(playerInfo);
         }
@@ -202,7 +211,7 @@ void GameView::updatePlayersCoords(QVector<PlayerInfo> players)
 
     }
 
-    this->players = players;
+//    this->players = players;
 
 }
 
@@ -237,6 +246,11 @@ void GameView::createBullet(BulletInfo bullet)
     Bullet* sceneBullet = new Bullet(bullet.startPos, bullet.angle);
     this->scene()->addItem(sceneBullet);
     sceneBullet->setPos(bullet.startPos);
+    if (QLineF((bullet.startPos), players.at(id).getPos()).length() < 700)
+    {
+        machinegunSound.play();
+            //    QSound::play(":/sounds/machinegun.wav");
+    }
 }
 
 void GameView::planeAndBulletCollided(Plane *plane, Bullet *bullet)
@@ -244,4 +258,33 @@ void GameView::planeAndBulletCollided(Plane *plane, Bullet *bullet)
     Q_UNUSED(plane)
     this->scene()->removeItem(bullet);
     delete bullet;
+//    if (players.at(plane->getId()).getHealth() <= 0) {
+//        showExplosion(players.at(plane->getId()).getPos());
+//    }
+}
+
+//void GameView::planeAndPlaneCollided(Plane* plane1, Plane* plane2)
+//{
+//    showExplosion(plane1->scenePos());
+//    showExplosion(plane2->scenePos());
+//}
+
+void GameView::showExplosion(QPointF pos)
+{
+    QLabel *gif_anim = new QLabel();
+    gif_anim->setStyleSheet("background: transparent");
+    gif_anim->setGeometry(0, 0, 72, 96);
+    gif_anim->move(qint32(pos.x()), qint32(pos.y()));
+    QMovie *movie = new QMovie(":/images/boom.gif");
+    movie->setScaledSize(QSize(72, 96));
+    gif_anim->setMovie(movie);
+    // ЗВУК ВЗРЫВА +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    movie->start();
+    QGraphicsProxyWidget *proxy = scene()->addWidget(gif_anim);
+    //proxy->setPos(pos);
+    QTimer::singleShot(1000, [=]() {
+        movie->stop();
+        movie->deleteLater();
+        gif_anim->deleteLater();
+    } );
 }

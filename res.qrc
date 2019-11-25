@@ -19,5 +19,6 @@
         <file>images/boom.gif</file>
         <file>sounds/airplane.wav</file>
         <file>sounds/machinegun.wav</file>
+        <file>sounds/explosion.wav</file>
     </qresource>
 </RCC>

@@ -28,6 +28,7 @@ private:
     QTimer* animationTimer;
     bool controlsBlocked;
     QSound machinegunSound;
+    QSound explosionSound;
     QSound planeSound;
 
     void drawMap(QVector <QString>& map) const;

@@ -2,7 +2,9 @@
 
 
 GameView::GameView(Client *client, idAndMap &info) :
-    machinegunSound(":/sounds/machinegun.wav"), planeSound(":/sounds/airplane.wav")
+    machinegunSound(":/sounds/machinegun.wav"),
+    explosionSound(":/sounds/explosion.wav"),
+    planeSound(":/sounds/airplane.wav")
 {
     this->client = client;
     this->id     = info.id;
@@ -142,6 +144,8 @@ void GameView::updatePlayerParams(PlayerInfo &player)
     if (players.at(number).getSpeed() == 0 && player.getSpeed() > 0) {
         planes [number]->show();
         controlsBlocked = false;
+        if (number == id)
+            planeSound.play();
     }
 
     players[number]. setSpeed(player.getSpeed());
@@ -157,8 +161,11 @@ void GameView::updatePlayerParams(PlayerInfo &player)
     if (previousHealth > 0 && players[number].getHealth() <= 0) {
         planes [number]->hide();
         showExplosion(players[number].getPos());
-        if (number == id)
+        if (number == id) {
             controlsBlocked = true;
+            planeSound.stop();
+            explosionSound.play();
+        }
     }
 }
 
@@ -271,18 +278,20 @@ void GameView::planeAndBulletCollided(Plane *plane, Bullet *bullet)
 
 void GameView::showExplosion(QPointF pos)
 {
+    pos = QPointF(pos.x() - IMAGE_SIZE / 2, pos.y() - IMAGE_SIZE / 2);
     QLabel *gif_anim = new QLabel();
     gif_anim->setStyleSheet("background: transparent");
-    gif_anim->setGeometry(0, 0, 72, 96);
+    //gif_anim->setGeometry(0, 0, 72, 96);
     gif_anim->move(qint32(pos.x()), qint32(pos.y()));
     QMovie *movie = new QMovie(":/images/boom.gif");
     movie->setScaledSize(QSize(72, 96));
     gif_anim->setMovie(movie);
     // ЗВУК ВЗРЫВА +++++++++++++++++++++++++++++++++++++++++++++++++++++++
     movie->start();
+    explosionSound.play();
     QGraphicsProxyWidget *proxy = scene()->addWidget(gif_anim);
-    //proxy->setPos(pos);
-    QTimer::singleShot(1000, [=]() {
+    proxy->setPos(pos);
+    QTimer::singleShot(800, [=]() {
         movie->stop();
         movie->deleteLater();
         gif_anim->deleteLater();

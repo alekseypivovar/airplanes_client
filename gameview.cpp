@@ -140,7 +140,7 @@ void GameView::createNewPlayer(PlayerInfo &player)
 void GameView::updatePlayerParams(PlayerInfo &player)
 {
     qint32 number = player.getId();
-
+    QPointF oldPos = planes[number]->scenePos();
     if (players.at(number).getSpeed() == 0 && player.getSpeed() > 0) {
         planes [number]->show();
         controlsBlocked = false;
@@ -160,7 +160,7 @@ void GameView::updatePlayerParams(PlayerInfo &player)
     players[number]. setHealth(player.getHealth());
     if (previousHealth > 0 && players[number].getHealth() <= 0) {
         planes [number]->hide();
-        showExplosion(players[number].getPos());
+        showExplosion(oldPos);
         if (number == id) {
             controlsBlocked = true;
             planeSound.stop();

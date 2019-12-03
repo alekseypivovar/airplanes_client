@@ -2,6 +2,7 @@
 #define CLIENT_H
 #include <QWidget>
 #include <QTcpSocket>
+#include "simplecrypt.h"
 #include "playerinfo.h"
 #include "bullet.h"
 
@@ -13,7 +14,7 @@ private:
     quint32 blockSize_map;
     quint16 blockSize;
     bool mapReceived;
-
+    SimpleCrypt crypto;
 public:
     explicit Client(const QString &strHost, int nPort, QObject *parent = nullptr);
 public slots:

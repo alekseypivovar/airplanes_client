@@ -11,15 +11,20 @@ Client::Client(const QString &strHost, int nPort, QObject *parent)
     connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadIdAndMap()));
     //connect(pTcpSpcket, SIGNAL(readyRead()), this, SLOT(SlotReadyRead()));
     connect(pTcpSpcket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
-
+    this->crypto = SimpleCrypt(4815162342);
 }
 
 
 void Client::SendToServer(const PlayerInfo player, SendInfoType type)
 {
+    QByteArray data;
+    QDataStream ds(&data, QIODevice::ReadWrite);
+    ds << player;
+    data = crypto.encryptToByteArray(data);
+
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
-    out << quint16(0) << type << player;
+    out << quint16(0) << type << data;
     out.device()->seek(0);
     out << quint16(block.size() - sizeof (quint16));
     pTcpSpcket->write(block);
@@ -42,8 +47,12 @@ void Client::SlotReadIdAndMap()
 
     blockSize_map = 0;
 
+    QByteArray bytes;
     idAndMap info;
-    in >> info;
+    in >> bytes;
+    bytes = crypto.decryptToByteArray(bytes);
+    QDataStream ds(&bytes, QIODevice::ReadWrite);
+    ds >> info;
 
     if (!info.map.isEmpty()) {
         qDebug() << "Map RECEIVED";
@@ -78,17 +87,24 @@ void Client::SlotReadyRead()
     type = SendInfoType(buffer);
 
     if (type == COORDS) {
-
+        QByteArray bytes;
+        in >> bytes;
+        bytes = crypto.decryptToByteArray(bytes);
         QVector<PlayerInfo> players;
-        in >> players;
+        QDataStream ds(&bytes, QIODevice::ReadWrite);
+        ds >> players;
 
         if (mapReceived)
             emit coordsReceived(players);
         qDebug() << "Data RECEIVED!";
     }
     else if (type == BULLET) {
+        QByteArray bytes;
+        in >> bytes;
+        bytes = crypto.decryptToByteArray(bytes);
         BulletInfo bullet;
-        in >> bullet;
+        QDataStream ds(&bytes, QIODevice::ReadWrite);
+        ds >> bullet;
 
         emit bulletReceived(bullet);
         qDebug() << "BULLET RECEIVED!";

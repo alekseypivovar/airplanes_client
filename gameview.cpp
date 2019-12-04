@@ -14,9 +14,10 @@ GameView::GameView(Client *client, idAndMap &info) :
 
     drawMap(info.map);
 
-    connect(client, SIGNAL(coordsReceived(QVector<PlayerInfo>)), this, SLOT(updatePlayersCoords(QVector<PlayerInfo>)));
+    connect(client, SIGNAL(coordsReceived(QVector<PlayerInfo>)),
+            this, SLOT(updatePlayersCoords(QVector<PlayerInfo>)), Qt::QueuedConnection);
     connect(this, SIGNAL(SendToServer(PlayerInfo, SendInfoType)), client, SLOT(SendToServer(PlayerInfo, SendInfoType)));
-    connect(client, SIGNAL(bulletReceived(BulletInfo)), this, SLOT(createBullet(BulletInfo)));
+    connect(client, SIGNAL(bulletReceived(BulletInfo)), this, SLOT(createBullet(BulletInfo)), Qt::QueuedConnection);
 
     animationTimer = new QTimer;
     animationTimer->start(1000 / FRAMES_PER_SEC);

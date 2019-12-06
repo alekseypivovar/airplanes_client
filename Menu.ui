@@ -33,6 +33,13 @@ background-color: rgba(255, 255, 255, 150);</string>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(193, 193, 193);</string>
         </property>
@@ -43,8 +50,12 @@ background-color: rgba(255, 255, 255, 150);</string>
       </item>
       <item>
        <widget class="QLineEdit" name="lineEdit_ip">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(193, 193, 193);</string>
+         <string notr="true">background-color: rgb(255, 255, 255);
+</string>
         </property>
         <property name="text">
          <string>localhost</string>
@@ -56,7 +67,25 @@ background-color: rgba(255, 255, 255, 150);</string>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QLabel" name="label_CONTROLS">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background:transparent;</string>
         </property>
@@ -73,6 +102,12 @@ ESC - exit</string>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_join">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(193, 193, 193);</string>
         </property>
@@ -86,6 +121,12 @@ ESC - exit</string>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_exit">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(193, 193, 193);</string>
         </property>

@@ -7,6 +7,7 @@ Menu::Menu(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->pushButton_join->setFocus();
+    ui->lineEdit_ip->setStyleSheet("background-color: rgb(255, 255, 255);");
 
     qRegisterMetaType<idAndMap>("idAndMap");
     qRegisterMetaType<PlayerInfo>("PlayerInfo");
